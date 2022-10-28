@@ -3,7 +3,7 @@ import "react-circular-progressbar/dist/styles.css";
 import PauseButton from "../PauseButton";
 import PlayButton from "../PlayButton";
 import SettingsButton from "../SettingsButton";
-import { useContext, useState, useEffect, useRef } from "react";
+import { useContext, useState, useEffect, useRef, useCallback } from "react";
 import SettingContext from "../SettingsContext";
 
 const red = "#f54e4e";
@@ -20,7 +20,7 @@ function Timer() {
   const isPausedRef = useRef(isPaused);
   const modeRef = useRef(mode);
 
-  function switchMode() {
+  const switchMode = useCallback(() => {
     const nextMode = modeRef.current === "work" ? "break" : "work";
     const nextSeconds =
       (nextMode === "work"
@@ -32,17 +32,17 @@ function Timer() {
 
     setSecondsLeft(nextSeconds);
     secondsLeftRef.current = nextSeconds;
-  }
+  }, [settingsInfo]);
 
   function tick() {
     secondsLeftRef.current--; //(-1)
     setSecondsLeft(secondsLeftRef.current);
   }
 
-  function initTimer() {
+  const initTimer = useCallback(() => {
     secondsLeftRef.current = settingsInfo.workMinutes * 60;
     setSecondsLeft(secondsLeftRef.current);
-  }
+  }, [settingsInfo]);
 
   useEffect(() => {
     initTimer();
@@ -58,7 +58,7 @@ function Timer() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [settingsInfo]);
+  }, [initTimer, switchMode]);
 
   const totalSeconds =
     mode === "work"
